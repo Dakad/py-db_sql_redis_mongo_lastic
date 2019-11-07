@@ -40,7 +40,7 @@ class GalleryInfo(Base, TimestampMixin):
     favorite_category= Column(String)
     my_rating = Column(Float)
 
-    thumbnail_link = relationship('GalleryThumbnail', backref="gallery_infos", uselist=False)
+    thumbnail_link = relationship('GalleryThumbnail', backref="gallery", uselist=False)
 
 
     def __init__(self, **kwargs):
@@ -74,6 +74,8 @@ class TorrentInfo(Base, TimestampMixin):
     posted_at = Column(DateTime, default=datetime.utcnow, unique=True)
     posted_by = Column(String)
 
+    gallery = relationship("GalleryInfo", backref="torrents")
+
 
 class TorrentHistory(Base, TimestampMixin):
     __tablename__ = "gallery_torrent_histories"
@@ -86,6 +88,8 @@ class TorrentHistory(Base, TimestampMixin):
     nb_peers = Column(Integer, default=0)
     fetched_at = Column(DateTime, default=datetime.utcnow)
 
+    torrent = relationship("TorrentInfo", backref="history")
+
     
 class GalleryRatingsFavorited(Base, TimestampMixin):
     __tablename__ = "gallery_ratings_n_favorited"
@@ -97,6 +101,8 @@ class GalleryRatingsFavorited(Base, TimestampMixin):
     nb_ratings = Column(Integer, nullable=True)
     avg_ratings = Column(Float, nullable=True)
     nb_favorited = Column(Integer, nullable=True)
+
+    gallery = relationship("GalleryInfo", backref="ratings_favorited_history")
 
 
 
@@ -132,7 +138,7 @@ class Main:
         #   SELECT
         if session.query(exists().where(GalleryInfo.language == 'English')).scalar():
             g2 = session.query(GalleryInfo).filter_by(language='English').first()
-            print(g2.g_hash, g2.title)
+            print(g2.g_hash, g2.title, dir(g2))
 
 
 
