@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, exists
 from sqlalchemy.orm import relationship, sessionmaker, ColumnProperty
-from sqlalchemy.schema import Column, ForeignKey, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy.schema import Column, ForeignKey, PrimaryKeyConstraint, UniqueConstraint, Sequence
 from sqlalchemy.types import Boolean, DateTime, Float, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -8,13 +8,13 @@ from datetime import datetime
 
 Base = declarative_base()
 
-class TimestampMixin(object):
+class TimestampMixin(Base):
     created_at = Column(DateTime, unique=True, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=True, default=None)
     deleted_at = Column(DateTime, nullable=True, default=None)
     
 
-class GalleryInfo(Base, TimestampMixin):
+class GalleryInfo(TimestampMixin):
     __tablename__ ="gallery_infos"
 
     g_hash = Column(String, primary_key=True)
@@ -56,16 +56,35 @@ class GalleryInfo(Base, TimestampMixin):
         return "{}{}{}".format(g_id, separator, g_token)
 
 
-class GalleryThumbnail(Base, TimestampMixin):
+class GalleryThumbnail(TimestampMixin):
     __tablename__ = "gallery_thumbnails"
     
     g_hash = Column(Integer, ForeignKey(GalleryInfo.g_hash), primary_key=True)
     thumb_link = Column(String, nullable=False)
 
 
-
+class TorrentInfo(TimestampMixin):
+    __tablename__ = "gallery_torrent_infos"
     
+    g_hash = Column(Integer, ForeignKey(GalleryInfo.g_hash))
+    g_tid = Column(String, primary_key=True)
+    link_hash = Column(String, nullable=False, unique=True)
+    file_name = Column(String, nullable=False)
+    file_size = Column(String, nullable=False)
+    posted_at = Column(DateTime, default=datetime.utcnow, unique=True)
+    posted_by = Column(String)
 
+
+class TorrentHistory(TimestampMixin):
+    __tablename__ = "gallery_torrent_histories"
+
+    id = Column(Integer, Sequence("__g_t_h_seq"), primary_key=True)
+    g_tid = Column(Integer, ForeignKey(TorrentInfo.g_tid))
+
+    nb_downloads = Column(Integer, default=0)
+    nb_seeds = Column(Integer, default=0)
+    nb_peers = Column(Integer, default=0)
+    fetched_at = Column(DateTime, default=datetime.utcnow)
 
 
 
