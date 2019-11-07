@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, exists
 from sqlalchemy.orm import relationship, sessionmaker, ColumnProperty
 from sqlalchemy.schema import Column, ForeignKey, PrimaryKeyConstraint
-from sqlalchemy.types import Boolean, DateTime, Float, Integer, String
+from sqlalchemy.types import Boolean, DateTime, Float, Integer, String,
 from sqlalchemy.ext.declarative import declarative_base
 
 from datetime import datetime
@@ -15,7 +15,7 @@ class TimestampMixin(object):
     
 
 class GalleryInfo(Base, TimestampMixin):
-    __tablename__ ="gallery_info"
+    __tablename__ ="gallery_infos"
     
     g_id = Column(String, primary_key=True)
     g_token = Column(String, primary_key=True)
@@ -39,9 +39,22 @@ class GalleryInfo(Base, TimestampMixin):
     favorite_category= Column(String)
     my_rating = Column(Float)
 
+    thumbnail_link = relationship('GalleryThumbnail', backref="gallery_infos", uselist=False)
 
 
 
+class GalleryThumbnail(Base, TimestampMixin):
+    __tablename__ = "gallery_thumbnails"
+    
+    g_hahsh = Column(Integer, ForeignKey(GalleryInfo.g_hash), primary_key=True)
+    thumb_link = Column(String, nullable=False)
+
+
+class TorrentInfo(Base, TimestampMixin):
+
+    __tablename__ = "gallery_torrents"
+
+    
 
 
 
