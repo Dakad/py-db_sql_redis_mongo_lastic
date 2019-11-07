@@ -9,12 +9,12 @@ from datetime import datetime
 Base = declarative_base()
 
 class TimestampMixin(object):
-    created_at = Column(DateTime, default=datetime.utcnow())
+    created_at = Column(DateTime, unique=True, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=True, default=None)
     deleted_at = Column(DateTime, nullable=True, default=None)
     
 
-class GalleryInfo(TimestampMixin, Base):
+class GalleryInfo(Base, TimestampMixin):
     __tablename__ ="gallery_info"
     
     g_id = Column(String, primary_key=True)
@@ -28,16 +28,18 @@ class GalleryInfo(TimestampMixin, Base):
     posted_by = Column(String)
     category = Column(String)
     language = Column(String)
-    is_translated = Column(Boolean)
-    is_visible = Column(Boolean)
-    is_expunged = Column(Boolean)
+    is_translated = Column(Boolean, default=False)
+    is_visible = Column(Boolean, default=True)
+    is_expunged = Column(Boolean, default=False)
     reason = Column(String, nullable=True)
     nb_pages = Column(Integer)
     file_size = Column(String)
     parent_gid = Column(String)
-    id_favorited = Column(Boolean, default=True)
+    is_favorited = Column(Boolean, default=True)
     favorite_category= Column(String)
     my_rating = Column(Float)
+
+
 
 
 
@@ -55,7 +57,7 @@ class Main:
             g1.my_rating = 4.5
             g1.language = "English"
             g1.is_translated = True
-            g.category = "Manga"
+            g1.category = "manga"
 
             # g1.address = a1
             # session.add(a1)
@@ -70,7 +72,7 @@ class Main:
         #   SELECT
         if session.query(exists().where(GalleryInfo.language == 'English')).scalar():
             g2 = session.query(GalleryInfo).filter_by(language='English').first()
-            print(g2.title)
+            print(g2.g_hash, g2.title)
 
 
 
