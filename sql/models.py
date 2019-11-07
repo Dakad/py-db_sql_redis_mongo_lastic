@@ -8,13 +8,13 @@ from datetime import datetime
 
 Base = declarative_base()
 
-class TimestampMixin(Base):
+class TimestampMixin(object):
     created_at = Column(DateTime, unique=True, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=True, default=None)
     deleted_at = Column(DateTime, nullable=True, default=None)
     
 
-class GalleryInfo(TimestampMixin):
+class GalleryInfo(Base, TimestampMixin):
     __tablename__ ="gallery_infos"
 
     g_hash = Column(String, primary_key=True)
@@ -56,14 +56,14 @@ class GalleryInfo(TimestampMixin):
         return "{}{}{}".format(g_id, separator, g_token)
 
 
-class GalleryThumbnail(TimestampMixin):
+class GalleryThumbnail(Base, TimestampMixin):
     __tablename__ = "gallery_thumbnails"
     
     g_hash = Column(Integer, ForeignKey(GalleryInfo.g_hash), primary_key=True)
     thumb_link = Column(String, nullable=False)
 
 
-class TorrentInfo(TimestampMixin):
+class TorrentInfo(Base, TimestampMixin):
     __tablename__ = "gallery_torrent_infos"
     
     g_hash = Column(Integer, ForeignKey(GalleryInfo.g_hash))
@@ -75,7 +75,7 @@ class TorrentInfo(TimestampMixin):
     posted_by = Column(String)
 
 
-class TorrentHistory(TimestampMixin):
+class TorrentHistory(Base, TimestampMixin):
     __tablename__ = "gallery_torrent_histories"
 
     id = Column(Integer, Sequence("__g_t_h_seq"), primary_key=True)
@@ -85,6 +85,19 @@ class TorrentHistory(TimestampMixin):
     nb_seeds = Column(Integer, default=0)
     nb_peers = Column(Integer, default=0)
     fetched_at = Column(DateTime, default=datetime.utcnow)
+
+    
+class GalleryRatingsFavorited(Base, TimestampMixin):
+    __tablename__ = "gallery_ratings_n_favorited"
+
+    id = Column(Integer, Sequence("__g_r_f_seq"), primary_key=True)
+    g_hash = Column(Integer, ForeignKey(GalleryInfo.g_hash))
+    fetched_at = Column(DateTime, default=datetime.utcnow)
+
+    nb_ratings = Column(Integer, nullable=True)
+    avg_ratings = Column(Float, nullable=True)
+    nb_favorited = Column(Integer, nullable=True)
+
 
 
 
@@ -129,7 +142,7 @@ class Main:
 if __name__ == '__main__':
     # database_uri = 'mysql+pymysql://user:pwd@localhost:3306/test'
     database_uri = 'sqlite:///tmp/db.sqlite3'
-    engine = create_engine(database_uri, echo=False)
+    engine = create_engine(database_uri, echo=True)
     
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
